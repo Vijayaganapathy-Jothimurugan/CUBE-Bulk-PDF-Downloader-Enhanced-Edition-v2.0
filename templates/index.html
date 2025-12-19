@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CUBE Bulk PDF Downloader - Enhanced</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 960px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px 28px 32px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 26px;
+      color: #111827;
+    }
+    .subtitle {
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: -8px;
+      margin-bottom: 8px;
+    }
+    p {
+      color: #4b5563;
+      font-size: 14px;
+      margin-top: 4px;
+      margin-bottom: 18px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      padding: 10px 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px #2563eb33;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #111827;
+      font-size: 14px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .mt-sm {
+      margin-top: 10px;
+    }
+    .mt-md {
+      margin-top: 18px;
+    }
+    .mt-lg {
+      margin-top: 24px;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 24px rgba(37, 99, 235, 0.4);
+      background: #1d4ed8;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    .status-card {
+      margin-top: 20px;
+      border-radius: 10px;
+      background: #f9fafb;
+      padding: 12px 14px;
+      border: 1px solid #e5e7eb;
+      font-size: 13px;
+      color: #374151;
+    }
+    .status-label {
+      font-weight: 600;
+      color: #111827;
+    }
+    .progress-bar-wrap {
+      margin-top: 8px;
+      background: #e5e7eb;
+      border-radius: 9999px;
+      overflow: hidden;
+      height: 8px;
+    }
+    .progress-bar {
+      height: 8px;
+      width: 0;
+      background: linear-gradient(90deg, #2563eb, #4f46e5);
+      transition: width 0.2s ease-out;
+    }
+    .status-text {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .badge {
+      display: inline-block;
+      border-radius: 9999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #1f2937;
+      background: #e5e7eb;
+      margin-left: 4px;
+    }
+    .badge-optional {
+      background: #dbeafe;
+      color: #1e3a8a;
+    }
+    .error {
+      margin-top: 12px;
+      color: #b91c1c;
+      font-size: 13px;
+    }
+    .hint {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+    .footer {
+      margin-top: 14px;
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: right;
+    }
+    .features {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      font-size: 13px;
+    }
+    .features h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #0c4a6e;
+    }
+    .features ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #0c4a6e;
+    }
+    .features li {
+      margin: 4px 0;
+    }
+    @media (max-width: 768px) {
+      .container {
+        margin: 20px auto;
+        border-radius: 0;
+      }
+      .row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CUBE Bulk PDF Downloader</h1>
+    <div class="subtitle">Enhanced Edition v2.0</div>
+    
+    <p>Paste one URL per line. The app will intelligently detect and download PDFs from each URL, including PDFs hidden behind HTML pages.</p>
+
+    <form id="job-form">
+      <div class="row">
+        <div>
+          <label for="urls">URLs <span class="badge">required</span></label>
+          <textarea id="urls" name="urls" placeholder="https://example.com/file1.pdf
+https://example.com/page-with-pdf
+https://www.frbservices.org/resources/rules.html
+https://example.com/another.pdf"></textarea>
+          <div class="hint">Each URL on a new line. Direct PDF links and HTML pages with PDFs are supported.</div>
+        </div>
+        <div>
+          <label for="urls">URLs <span class="badge">required</span></label>
+          <textarea id="file_names" name="file_names" placeholder="custom1.pdf
+custom2.pdf
+report.pdf"></textarea>
+          <div class="hint">One name per line (matching URL order). Leave blank for auto-generated names.</div>
+        </div>
+      </div>
+
+      <div class="mt-lg">
+        <button type="submit" id="start-btn">
+          <span id="btn-icon">▶</span>
+          <span id="btn-text">Start Download Job</span>
+        </button>
+      </div>
+    </form>
+
+    <div id="status-card" class="status-card" style="display:none;">
+      <div class="status-label">
+        Job status: <span id="status-text">Starting...</span>
+      </div>
+      <div class="progress-bar-wrap mt-sm">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+      <div class="status-text" id="progress-text"></div>
+    </div>
+
+    <div id="error-msg" class="error" style="display:none;"></div>
+
+    <div class="footer">
+Cube India @2026     </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('job-form');
+    const startBtn = document.getElementById('start-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnIcon = document.getElementById('btn-icon');
+    const statusCard = document.getElementById('status-card');
+    const statusText = document.getElementById('status-text');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const errorMsg = document.getElementById('error-msg');
+
+    let currentJobId = null;
+    let pollInterval = null;
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      errorMsg.style.display = 'none';
+      statusCard.style.display = 'none';
+
+      const urls = document.getElementById('urls').value.trim();
+      if (!urls) {
+        errorMsg.textContent = 'Please enter at least one URL.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      startBtn.disabled = true;
+      btnText.textContent = 'Starting...';
+      btnIcon.textContent = '⏳';
+
+      const formData = new FormData();
+      formData.append('urls', urls);
+      formData.append('file_names', document.getElementById('file_names').value.trim());
+
+      fetch('/start', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json().then(data => ({ok: res.ok, data})))
+      .then(({ok, data}) => {
+        if (!ok) {
+          throw new Error(data.error || 'Failed to start job');
+        }
+        currentJobId = data.job_id;
+        statusCard.style.display = 'block';
+        statusText.textContent = 'Running...';
+        progressBar.style.width = '0%';
+        progressText.textContent = '0 / ? URLs processed';
+
+        btnText.textContent = 'Job Running...';
+        btnIcon.textContent = '⚙';
+        pollStatus();
+        pollInterval = setInterval(pollStatus, 1500);
+      })
+      .catch(err => {
+        startBtn.disabled = false;
+        btnText.textContent = 'Start Download Job';
+        btnIcon.textContent = '▶';
+        errorMsg.textContent = err.message || 'Something went wrong starting the job.';
+        errorMsg.style.display = 'block';
+      });
+    });
+
+    function pollStatus() {
+      if (!currentJobId) return;
+
+      fetch(`/status/${currentJobId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            throw new Error(data.error);
+          }
+          const processed = data.processed || 0;
+          const total = data.total || 0;
+          const status = data.status || 'running';
+
+          let percent = 0;
+          if (total > 0) {
+            percent = Math.round((processed / total) * 100);
+          }
+          progressBar.style.width = percent + '%';
+          progressText.textContent = `${processed} / ${total || '?'} URLs processed (${percent}%)`;
+          statusText.textContent = status;
+
+          if (status === 'done') {
+            clearInterval(pollInterval);
+            btnText.textContent = 'Start Download Job';
+            btnIcon.textContent = '▶';
+            startBtn.disabled = false;
+
+            statusText.textContent = 'Done!';
+            setTimeout(() => {
+              window.location.href = `/results/${currentJobId}`;
+            }, 800);
+          }
+        })
+        .catch(err => {
+          console.error('Error polling status:', err);
+        });
+    }
+  </script>
+</body>
+</html>

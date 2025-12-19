@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Download Results - CUBE PDF Downloader</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 32px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px 24px 28px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      color: #111827;
+    }
+    .sub {
+      margin-top: 4px;
+      color: #6b7280;
+      font-size: 13px;
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .stat-card {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+    }
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #9ca3af;
+    }
+    .stat-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+      margin-top: 4px;
+    }
+    .stat-sub {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: #1d4ed8;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+      box-shadow: none;
+    }
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 13px;
+    }
+    thead {
+      background: #f9fafb;
+    }
+    th, td {
+      padding: 8px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #6b7280;
+    }
+    tr:hover td {
+      background: #f9fafb;
+    }
+    .status-pill {
+      border-radius: 9999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .status-success {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .status-failed {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .status-nopdf {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .status-timeout {
+      background: #e0f2fe;
+      color: #075985;
+    }
+    .status-protected {
+      background: #ede9fe;
+      color: #5b21b6;
+    }
+    .status-multiple {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .status-other {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .badge-link {
+      font-size: 11px;
+      color: #2563eb;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .badge-link:hover {
+      text-decoration: underline;
+    }
+    .small {
+      font-size: 11px;
+      color: #6b7280;
+    }
+    .footer {
+      margin-top: 12px;
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: right;
+    }
+    .pdf-count-badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e3a8a;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 9999px;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+    .alert {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #92400e;
+    }
+    .alert-info {
+      background: #dbeafe;
+      border-color: #60a5fa;
+      color: #1e3a8a;
+    }
+    @media (max-width: 900px) {
+      .container {
+        margin: 20px auto;
+        border-radius: 0;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <div>
+        <h1>Download Results</h1>
+        <div class="sub">
+          Session folder: <code>{{ session_folder }}</code>
+        </div>
+      </div>
+      <div>
+        <a href="/" class="btn btn-secondary">← New Job</a>
+        <a href="/download_zip/{{ session_folder }}" class="btn" style="margin-left: 6px;">
+          ⬇ Download PDFs ZIP
+        </a>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total URLs</div>
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-sub">All lines you submitted</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Successful PDFs</div>
+        <div class="stat-value">{{ stats.success }}</div>
+        <div class="stat-sub">{{ stats.success_rate }}% success rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total PDF Size</div>
+        <div class="stat-value">{{ stats.total_size_mb }} MB</div>
+        <div class="stat-sub">Sum of all downloaded PDFs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">PDFs Detected</div>
+        <div class="stat-value">{{ stats.total_pdfs_detected }}</div>
+        <div class="stat-sub">Total PDF links found</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Issues</div>
+        <div class="stat-value">
+          {{ stats.failed + stats.no_pdf + stats.timeout + stats.error + stats.forbidden + stats.ssl_error + stats.not_found + stats.protected + stats.other }}
+        </div>
+        <div class="stat-sub">
+          {{ stats.no_pdf }} no PDF ·
+          {{ stats.timeout }} timeout ·
+          {{ stats.multiple_pdfs }} multiple ·
+          {{ stats.error }} error
+        </div>
+      </div>
+    </div>
+
+    {% if stats.multiple_pdfs > 0 %}
+    <div class="alert alert-info">
+      <strong>ℹ️ Multiple PDFs Detected:</strong> {{ stats.multiple_pdfs }} URL(s) contained multiple PDF links. The best match was downloaded automatically. Check the "PDF Count" column for details.
+    </div>
+    {% endif %}
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>URL</th>
+          <th>File Name</th>
+          <th>Status</th>
+          <th>Reason</th>
+          <th>Found PDF Link</th>
+          <th>PDF Count</th>
+          <th>Size (MB)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in summary %}
+        <tr>
+          <td>{{ row['Line'] }}</td>
+          <td><a class="badge-link" href="{{ row['URL'] }}" target="_blank" rel="noopener noreferrer">{{ row['URL'] }}</a></td>
+          <td>
+            {% if row['File Name'] %}
+              {{ row['File Name'] }}
+            {% else %}
+              <span class="small">auto</span>
+            {% endif %}
+          </td>
+          <td>
+            {% set s = row['Status'] %}
+            {% if s == 'Success' %}
+              <span class="status-pill status-success">Success</span>
+            {% elif s == 'Multiple PDFs Found' %}
+              <span class="status-pill status-multiple">Multiple PDFs</span>
+            {% elif s == 'No PDF' %}
+              <span class="status-pill status-nopdf">No PDF</span>
+            {% elif s == 'Timeout' %}
+              <span class="status-pill status-timeout">Timeout</span>
+            {% elif s == 'Protected' %}
+              <span class="status-pill status-protected">Protected</span>
+            {% elif '404' in s %}
+              <span class="status-pill status-failed">404 Not Found</span>
+            {% elif '403' in s or 'Forbidden' in s %}
+              <span class="status-pill status-failed">Forbidden</span>
+            {% elif 'SSL' in s %}
+              <span class="status-pill status-other">SSL Error</span>
+            {% elif s == 'Failed' %}
+              <span class="status-pill status-failed">Failed</span>
+            {% else %}
+              <span class="status-pill status-other">{{ s }}</span>
+            {% endif %}
+          </td>
+          <td>{{ row['Reason'] }}</td>
+          <td>
+            {% if row['Found PDF'] %}
+              <a class="badge-link" href="{{ row['Found PDF'] }}" target="_blank" rel="noopener noreferrer">{{ row['Found PDF'][:60] }}{% if row['Found PDF']|length > 60 %}...{% endif %}</a>
+            {% else %}
+              <span class="small">—</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if row['PDF Count'] and row['PDF Count'] > 0 %}
+              <span class="pdf-count-badge">{{ row['PDF Count'] }} PDF{% if row['PDF Count'] > 1 %}s{% endif %}</span>
+            {% else %}
+              <span class="small">—</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if row['File Size (MB)'] %}
+              {{ "%.2f"|format(row['File Size (MB)']) }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="footer">
+      Enhanced CUBE PDF Downloader v2.0 - @2026
+    
+    </div>
+  </div>
+</body>
+</html>
