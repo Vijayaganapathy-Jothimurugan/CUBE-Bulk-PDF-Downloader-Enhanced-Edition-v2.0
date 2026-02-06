@@ -19,31 +19,25 @@ from requests.exceptions import SSLError, Timeout, RequestException
 
 warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
-# Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# ------------------ CONFIG ------------------
-
-# Performance tuning - optimized for speed
-MAX_WORKERS = int(os.getenv('MAX_WORKERS', '10'))
-PER_REQUEST_TIMEOUT = int(os.getenv('REQUEST_TIMEOUT', '10'))
-PER_ITEM_HARD_TIMEOUT = int(os.getenv('ITEM_TIMEOUT', '30'))
+MAX_WORKERS = int(os.getenv('MAX_WORKERS', '100'))
+PER_REQUEST_TIMEOUT = int(os.getenv('REQUEST_TIMEOUT', '100'))
+PER_ITEM_HARD_TIMEOUT = int(os.getenv('ITEM_TIMEOUT', '500'))
 MAX_REDIRECT_FOLLOW = 10
 MAX_PDF_SIZE_MB = int(os.getenv('MAX_PDF_SIZE_MB', '500'))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_OUTPUT = os.path.join(BASE_DIR, 'outputs')
 
-# Disable SSL verification by default due to certificate issues
 VERIFY_SSL = False
 
 JOBS = {}
 LOCK = threading.Lock()
 
-# Enhanced user agents with more realistic browsers
 USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
@@ -53,7 +47,6 @@ USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0',
 ]
 
-# Bot detection bypass headers
 ANTI_BOT_HEADERS = {
     'sec-ch-ua': '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
     'sec-ch-ua-mobile': '?0',
@@ -65,7 +58,6 @@ ANTI_BOT_HEADERS = {
     'dnt': '1',
 }
 
-# ------------------ HELPERS ------------------
 
 def get_headers(ua_index=0, referer=None):
     """Generate realistic browser headers with anti-bot measures"""
@@ -142,7 +134,7 @@ def create_session_with_retry(attempt=0):
     from urllib3.util.retry import Retry
 
     retry_strategy = Retry(
-        total=2,  # Reduced retries
+        total=2,  
         backoff_factor=0.3,
         status_forcelist=[429, 500, 502, 503, 504],
         allowed_methods=["HEAD", "GET", "OPTIONS", "POST"],
@@ -165,7 +157,6 @@ def extract_filename(response, url):
     """Extract filename from response headers or URL"""
     fname = None
 
-    # Try Content-Disposition header
     cd = response.headers.get('Content-Disposition', '')
     if cd:
         fname_match = re.findall(r'filename[^;=\n]*=(([\'"]).*?\2|[^;\n]*)', cd)
@@ -173,12 +164,10 @@ def extract_filename(response, url):
             fname = fname_match[0][0].strip('\'"')
             fname = unquote(fname)
 
-    # Try URL path
     if not fname:
         fname = os.path.basename(urlparse(url).path)
         fname = unquote(fname)
 
-    # Fallback to timestamp-based name
     if not fname or len(fname) < 3:
         fname = f"file_{int(datetime.utcnow().timestamp())}.pdf"
 
@@ -197,7 +186,6 @@ def find_pdf_links_from_html(content, base_url) -> List[Dict]:
             if not href or len(href) < 3:
                 return
             
-            # Resolve relative URLs
             try:
                 href_abs = urljoin(base_url, href)
             except Exception:
@@ -207,7 +195,6 @@ def find_pdf_links_from_html(content, base_url) -> List[Dict]:
             text_lower = (text_hint or '').lower()
             score = 0
 
-            # URL-based scoring - enhanced
             if '.pdf' in href_lower:
                 score += 15
             if href_lower.endswith('.pdf'):
@@ -221,7 +208,6 @@ def find_pdf_links_from_html(content, base_url) -> List[Dict]:
             if any(x in href_lower for x in ['/pdf/', '/docs/', '/files/', '/downloads/']):
                 score += 6
 
-            # Text-based scoring - enhanced
             if 'pdf' in text_lower:
                 score += 8
             if any(x in text_lower for x in ['download', 'view pdf', 'open pdf', 'get pdf']):
